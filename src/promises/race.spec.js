@@ -1,36 +1,44 @@
-test("Promise.race() returns promise that resolves when one of the input promises resolves", () => {
-    const p1 = new Promise((resolve, reject) => {
-        setTimeout(reject, 200, "first promise rejected");
+const toDelayedResolvedPromise = (valueToResolve, time) => {
+    return new Promise((resolve) => {
+        setTimeout(resolve, time, valueToResolve);
     });
+};
 
-    const p2 = new Promise((resolve, reject) => {
-        setTimeout(resolve, 100, "second promise resolved");
+const toDelayedRejectedPromise = (valueToReject, time) => {
+    return new Promise((resolve, reject) => {
+        setTimeout(reject, time, valueToReject);
     });
+};
 
-    let result = function() {
-        return Promise.race([p1, p2]);
-    }
+
+test("Promise.race(): will resolve when first finished input promise resolves", () => {
+    const promiseTimeout200ErrorMessage = "first promise rejected";
+    const promiseTimeout200 = toDelayedRejectedPromise(promiseTimeout200ErrorMessage, 200);
+
+    const promiseTimeout100Result = "second promise resolved";
+    const promiseTimeout100 = toDelayedResolvedPromise(promiseTimeout100Result, 100);
+
+    const result = () => {
+        return Promise.race([promiseTimeout200, promiseTimeout100]);
+    };
 
     return result().then(result => {
-        expect(result).toEqual("second promise resolved");
+        expect(result).toEqual(promiseTimeout100Result);
     });
 });
 
+test("Promise.race(): will reject when first finished input promise rejects", () => {
+    const promiseTimeout100ErrorMessage = "first promise rejected";
+    const promiseTimeout100 = toDelayedRejectedPromise(promiseTimeout100ErrorMessage, 100);
 
-test("Promise.race() returns promise that rejects when one of the input promises rejects", () => {
-    const p1 = new Promise((resolve, reject) => {
-        setTimeout(reject, 100, "first promise rejected");
-    });
+    const promiseTimeout200Result = "second promise resolved";
+    const promiseTimeout200 = toDelayedResolvedPromise(promiseTimeout200Result, 200);
 
-    const p2 = new Promise((resolve, reject) => {
-        setTimeout(resolve, 200, "second promise resolved");
-    });
-
-    let result = function() {
-        return Promise.race([p1, p2]);
-    }
+    const result = () => {
+        return Promise.race([promiseTimeout200, promiseTimeout100]);
+    };
 
     return result().catch(error => {
-        expect(error).toEqual("first promise rejected");
+        expect(error).toEqual(promiseTimeout100ErrorMessage);
     });
 });

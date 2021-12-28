@@ -1,4 +1,4 @@
-test("Promise.allSettled() will run after all given promises finish", () => {
+test("Promise.allSettled(): will run after all given promises finish", () => {
     const toDelayedPromise = (valueToReject, time) => {
         return new Promise((resolve, reject) => {
             setTimeout(reject, time, valueToReject);
@@ -16,8 +16,8 @@ test("Promise.allSettled() will run after all given promises finish", () => {
 
     return result().then(result => {
         expect(result).toEqual([
-                { status: "rejected", reason: "first promise rejected" },
-                { status: "fulfilled", value: "second promise resolved" },
+                { status: "rejected", reason: promiseTimeout200Error },
+                { status: "fulfilled", value: pureString },
             ]);
     });
 });
